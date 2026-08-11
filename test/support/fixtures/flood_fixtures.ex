@@ -11,10 +11,10 @@ defmodule BahaBa.FloodFixtures do
     {:ok, report} =
       attrs
       |> Enum.into(%{
-        device_hash: "some device_hash",
-        flags_count: 42,
-        photo_url: "some photo_url",
-        water_level: "some water_level"
+        "latitude" => 14.5995,
+        "longitude" => 120.9842,
+        "water_level" => "passable",
+        "photo_url" => "https://example.com/flood.jpg"
       })
       |> BahaBa.Flood.create_report()
 
