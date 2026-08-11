@@ -25,6 +25,7 @@ defmodule BahaBaWeb.MapLive do
      |> assign(:longitude, nil)
      |> assign(:reports, initial_reports)
      |> assign(:initial_reports_json, initial_reports_json)
+     |> assign(:show_about_modal, false)
      |> allow_upload(:photo,
        accept: ~w(.jpg .jpeg .png),
        max_entries: 1,
@@ -35,7 +36,7 @@ defmodule BahaBaWeb.MapLive do
   def render(assigns) do
     ~H"""
     <div class="h-dvh w-screen relative overflow-hidden bg-slate-100 flex flex-col">
-      <!-- Top Bar: Search + View Toggle -->
+      <!-- Top Bar: Search + View Toggle + About Modal Button -->
       <div class="absolute top-3 left-3 right-3 z-20 flex gap-2 items-center pointer-events-none">
         <div class="flex-1 bg-white/95 backdrop-blur-md rounded-xl shadow-md border border-slate-200 flex items-center px-3 py-1.5 pointer-events-auto">
           <span class="text-slate-400 mr-2">🔍</span>
@@ -49,9 +50,20 @@ defmodule BahaBaWeb.MapLive do
 
         <button
           phx-click="toggle_view_mode"
-          class="bg-slate-900 text-white text-xs font-bold px-3 py-3 rounded-xl shadow-md shrink-0 flex items-center gap-1 pointer-events-auto"
+          class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-3 py-3 rounded-xl shadow-md shrink-0 flex items-center gap-1 pointer-events-auto cursor-pointer transition-all"
         >
           <%= if @view_mode == "map", do: "📋 List View", else: "🗺️ Map View" %>
+        </button>
+
+        <button
+          type="button"
+          phx-click="open_about_modal"
+          class="bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold p-3 rounded-xl shadow-md border border-slate-200 shrink-0 flex items-center justify-center pointer-events-auto cursor-pointer transition-all"
+          aria-label="About Baha Ba?"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
         </button>
       </div>
 
@@ -158,8 +170,68 @@ defmodule BahaBaWeb.MapLive do
           </button>
         </.form>
       </div>
+
+      <!-- About Modal -->
+      <%= if @show_about_modal do %>
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div class="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-sm w-full p-5 space-y-4 relative">
+            <button
+              type="button"
+              phx-click="close_about_modal"
+              class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold p-1 rounded-lg transition"
+            >
+              ✕
+            </button>
+
+            <div class="border-b border-slate-100 pb-2">
+              <h2 class="text-lg font-black text-slate-900">About Baha Ba?</h2>
+            </div>
+
+            <p class="text-xs leading-relaxed text-slate-600">
+              <strong>Baha Ba?</strong> is an open-source, community-driven flood monitoring platform designed to provide real-time updates on road conditions and water levels across the Philippines.
+            </p>
+
+            <div class="rounded-xl bg-slate-50 p-3 text-xs space-y-2 border border-slate-200">
+              <div class="flex items-center justify-between">
+                <span class="font-medium text-slate-600">Open Source</span>
+                <a
+                  href="https://github.com/WillNigel23/baha_ba"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-blue-600 hover:text-blue-700 hover:underline font-bold flex items-center gap-1"
+                >
+                  GitHub Repository
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <span class="font-medium text-slate-600">Author</span>
+                <span class="text-slate-900 font-bold">Will Nigel De Jesus</span>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <span class="font-medium text-slate-600">Contact</span>
+                <a href="mailto:willnigelcdejesus@gmail.com" class="text-blue-600 hover:text-blue-700 hover:underline font-medium">
+                  willnigelcdejesus@gmail.com
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
     </div>
     """
+  end
+
+  def handle_event("open_about_modal", _params, socket) do
+    {:noreply, assign(socket, :show_about_modal, true)}
+  end
+
+  def handle_event("close_about_modal", _params, socket) do
+    {:noreply, assign(socket, :show_about_modal, false)}
   end
 
   def handle_event("drop_pin", _params, socket) do
@@ -253,9 +325,9 @@ defmodule BahaBaWeb.MapLive do
     updated_reports = Enum.reject(socket.assigns.reports, &(&1.id == report_id))
 
     {:noreply,
-      socket
-      |> assign(:reports, updated_reports)
-      |> push_event("remove_pin", %{id: report_id})}
+     socket
+     |> assign(:reports, updated_reports)
+     |> push_event("remove_pin", %{id: report_id})}
   end
 
   # Real-time PubSub handler for live updates across all open clients
