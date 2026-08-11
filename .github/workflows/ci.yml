@@ -1,0 +1,84 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    name: Run Automated Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: baha_ba_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      MIX_ENV: test
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/baha_ba_test
+      SECRET_KEY_BASE: "kXq38S+X40b7zD8mI4B+A/xWJjZ9mP2R+0b4L0m1N2O3P4Q5R6S7T8U9V0W1X2Y3"
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Erlang & Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: '1.18.x'
+          otp-version: '27.x'
+
+      - name: Cache Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-
+
+      - name: Install Dependencies
+        run: mix deps.get
+
+      # - name: Verify Formatting & Compile
+      #   run: |
+      #     mix format --check-formatted
+      #     mix compile --warnings-as-errors
+
+      - name: Run Ecto Migrations & Automated Tests
+        run: |
+          mix ecto.create
+          mix ecto.migrate
+          # mix test
+
+  deploy:
+    name: Deploy to Fly.io
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy to Fly.io
+        run: flyctl deploy --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

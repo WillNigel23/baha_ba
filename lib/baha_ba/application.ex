@@ -7,8 +7,8 @@ defmodule BahaBa.Application do
 
   @impl true
   def start(_type, _args) do
-    unless Mix.env == :prod do
-      Dotenv.load
+    if Code.ensure_loaded?(Mix) and Mix.env() != :prod do
+      Dotenv.load()
       Mix.Task.run("loadconfig")
     end
 
