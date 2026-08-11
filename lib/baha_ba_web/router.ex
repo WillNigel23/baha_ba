@@ -17,7 +17,7 @@ defmodule BahaBaWeb.Router do
   scope "/", BahaBaWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", MapLive
   end
 
   # Other scopes may use custom stacks.
