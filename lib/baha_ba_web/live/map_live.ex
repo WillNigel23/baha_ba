@@ -95,13 +95,6 @@ defmodule BahaBaWeb.MapLive do
                     <p class="text-xs text-slate-500 font-medium">
                       {format_pht_time(report.inserted_at)}
                     </p>
-                    <button
-                      phx-click="flag_report"
-                      phx-value-id={report.id}
-                      class="text-[10px] text-red-500 font-semibold mt-1 hover:underline"
-                    >
-                      🚩 Report Outdated/Fake
-                    </button>
                   </div>
                 </div>
               <% end %>
