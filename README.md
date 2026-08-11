@@ -13,6 +13,8 @@ Built with **Elixir**, **Phoenix LiveView**, **Tailwind CSS**, and **LeafletJS**
 * **Crowdsourced Moderation:** Upvote or downvote reports to keep data accurate and flag outdated pins.
 * **List View:** Switch between map view and a simple chronological feed.
 
+[![DEMO](https://raw.githubusercontent.com/WillNigel23/baha_ba/main/DEMO.png)](https://raw.githubusercontent.com/WillNigel23/baha_ba/main/DEMO.mp4)
+
 ---
 
 ## 🛠️ Tech Stack

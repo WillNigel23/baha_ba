@@ -8,15 +8,23 @@ defmodule BahaBa.FloodFixtures do
   Generate a report.
   """
   def report_fixture(attrs \\ %{}) do
+    defaults = %{
+      "latitude" => 14.5995,
+      "longitude" => 120.9842,
+      "water_level" => "passable",
+      "photo_url" => "http://example.com/flood.jpg"
+    }
+
+    # Normalize all keys in attrs to strings to guarantee a 100% string-keyed map
+    normalized_attrs =
+      Map.new(attrs, fn {k, v} ->
+        {to_string(k), v}
+      end)
+
     {:ok, report} =
-      attrs
-      |> Enum.into(%{
-        "latitude" => 14.5995,
-        "longitude" => 120.9842,
-        "water_level" => "passable",
-        "photo_url" => "https://example.com/flood.jpg"
-      })
-      |> BahaBa.Flood.create_report()
+      defaults
+      |> Map.merge(normalized_attrs)
+      |> Flood.create_report()
 
     report
   end

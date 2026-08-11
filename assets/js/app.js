@@ -2,8 +2,9 @@ import { Socket } from "phoenix"
 import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 import { MapHook } from "./hooks/map_hook"
+import { ResizeUpload } from "./hooks/resize_hook"
 
-let Hooks = { MapHook }
+let Hooks = { MapHook, ResizeUpload }
 
 // Custom LiveView Direct Uploader for Cloudinary
 let Uploaders = {}

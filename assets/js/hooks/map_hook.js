@@ -250,6 +250,9 @@ export const MapHook = {
     return `
       <div style="font-size: 12px; width: 150px; font-family: system-ui, -apple-system, sans-serif;">
         <b style="text-transform: uppercase; letter-spacing: 0.5px;">${report.water_level}</b><br/>
+        <p class="text-xs text-slate-500 font-medium">
+          ${report.as_of}
+        </p>
         <img src="${report.photo_url}" style="width: 100%; height: 85px; object-fit: cover; border-radius: 8px; margin: 6px 0;" />
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px; background: #f8fafc; padding: 4px 6px; border-radius: 6px; border: 1px solid #e2e8f0;">
           <button data-id="${report.id}" data-type="up" class="vote-btn" style="background:#22c55e; color:white; border:none; padding:3px 8px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:11px;">👍 ${upvotes}</button>

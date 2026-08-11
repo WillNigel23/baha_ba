@@ -27,8 +27,9 @@ defmodule BahaBaWeb.MapLive do
      |> assign(:initial_reports_json, initial_reports_json)
      |> assign(:show_about_modal, false)
      |> allow_upload(:photo,
-       accept: ~w(.jpg .jpeg .png),
+       accept: ~w(.jpg .jpeg .png .heic .heif .webp),
        max_entries: 1,
+       max_file_size: 25_000_000,
        external: &presign_cloudinary/2
      )}
   end
@@ -92,15 +93,8 @@ defmodule BahaBaWeb.MapLive do
                       <%= report.water_level %>
                     </span>
                     <p class="text-xs text-slate-500 font-medium">
-                      Reported <%= Calendar.strftime(report.inserted_at, "%I:%M %p") %>
+                      {format_pht_time(report.inserted_at)}
                     </p>
-                    <button
-                      phx-click="flag_report"
-                      phx-value-id={report.id}
-                      class="text-[10px] text-red-500 font-semibold mt-1 hover:underline"
-                    >
-                      🚩 Report Outdated/Fake
-                    </button>
                   </div>
                 </div>
               <% end %>
@@ -158,7 +152,7 @@ defmodule BahaBaWeb.MapLive do
           </div>
 
           <div>
-            <.live_file_input upload={@uploads.photo} class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" />
+            <.live_file_input upload={@uploads.photo} phx-hook="ResizeUpload" class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100" />
           </div>
 
           <button
@@ -346,6 +340,13 @@ defmodule BahaBaWeb.MapLive do
   defp water_level_color("severe"), do: "bg-red-600"
   defp water_level_color(_), do: "bg-slate-500"
 
+  defp format_pht_time(nil), do: ""
+  defp format_pht_time(naive_datetime) do
+    # Shift UTC time by +8 hours for Philippine Standard Time (PHT)
+    pht_time = NaiveDateTime.add(naive_datetime, 8 * 3600, :second)
+    "As of " <> Calendar.strftime(pht_time, "%b %d, %I:%M %p")
+  end
+
   defp sanitize_report(report) do
     %{
       id: report.id,
@@ -355,7 +356,8 @@ defmodule BahaBaWeb.MapLive do
       photo_url: report.photo_url,
       upvotes_count: report.upvotes_count,
       downvotes_count: report.downvotes_count,
-      inserted_at: report.inserted_at
+      inserted_at: report.inserted_at,
+      as_of: format_pht_time(report.inserted_at)
     }
   end
 

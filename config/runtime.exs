@@ -30,12 +30,12 @@ if config_env() == :dev do
       web_console_logger: true,
       patterns: [
         # Static assets, except user uploads
-        ~r"priv/static/(?!uploads/).*\.(js|css|png|jpeg|jpg|gif|svg)$"E,
+        ~r"priv/static/(?!uploads/).*\.(js|css|png|jpeg|jpg|gif|svg)$",
         # Gettext translations
-        ~r"priv/gettext/.*\.po$"E,
+        ~r"priv/gettext/.*\.po$",
         # Router, Controllers, LiveViews and LiveComponents
-        ~r"lib/baha_ba_web/router\.ex$"E,
-        ~r"lib/baha_ba_web/(controllers|live|components)/.*\.(ex|heex)$"E
+        ~r"lib/baha_ba_web/router\.ex$",
+        ~r"lib/baha_ba_web/(controllers|live|components)/.*\.(ex|heex)$"
       ]
     ]
 end
@@ -70,7 +70,7 @@ if config_env() == :prod do
       You can generate one by calling: mix phx.gen.secret
       """
 
-  host = System.get_env("PHX_HOST") || "example.com"
+  host = System.get_env("PHX_HOST") || "baha-ba-ph.com"
 
   config :baha_ba, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 
@@ -83,7 +83,12 @@ if config_env() == :prod do
       # for details about using IPv6 vs IPv4 and loopback vs public addresses.
       ip: {0, 0, 0, 0, 0, 0, 0, 0}
     ],
-    secret_key_base: secret_key_base
+    secret_key_base: secret_key_base,
+    check_origin: [
+      "https://#{host}",
+      "https://www.#{host}",
+      "https://baha-ba.fly.dev"
+    ]
 
   # ## SSL Support
   #
